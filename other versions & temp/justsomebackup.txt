@@ -1,0 +1,156 @@
+import java.io.*;
+import java.util.Scanner;
+
+/*
+* @author Michael Hearn ( mthearn )
+*/
+public class Proj4 {
+
+  public final static int M = 31991;
+  public static final int NUMER_OF_CHARS = 3;
+  public static String[] myHash = new String[ M ];
+  public static int N = 25253; // temporary count this later
+  public static int collisions = 0;
+  public static int spellCollisions = 0;
+  public static int wordCount = 0;
+  public static int spellWordCount = 0;
+
+  /*
+  * starting point of the program
+  * initializes our data structures 
+  * and calls our other functions to fill those structures
+  * @param args, string array of arguments
+  */
+  public static void main(String[] args) throws FileNotFoundException {
+
+    Scanner console = new Scanner( System.in );
+    // read input file
+    readInHash( console );
+    readInText( console );
+    report();
+    printHash();
+
+    console.close();
+
+  }
+
+  /*
+  * reads in the input
+  */
+  public static void readInText( Scanner console ) throws FileNotFoundException {
+
+    Scanner textReader = new Scanner(new File( console.next() ) );
+
+    double attic = M - N;
+    Scanner line;
+    String temp;
+    while ( textReader.hasNextLine() ) {
+      line = new Scanner ( textReader.nextLine() );
+
+      while ( line.hasNext() ) {
+        temp = line.next();
+        spellWordCount++;
+        int idx = getidx( temp, NUMER_OF_CHARS );
+
+        while ( !(myHash[ idx ].equals( temp )) ) {
+          //place collision resolve here
+          spellCollisions++;
+          idx = getResolvedIdx( idx );
+          if ( myHash[ idx ] == null ) {
+            System.out.println( " word not found: " + temp );
+            break;
+          }
+        } // looking for the word in hash table
+      } // done with this word
+      line.close();
+    } // end of line 
+    textReader.close();
+  }
+
+  /*
+  * reads in the input
+  * also fills in the data structures with that data
+  */
+  public static void readInHash( Scanner console ) throws FileNotFoundException {
+
+    Scanner reader = new Scanner(new File( console.next() ) );
+
+    double attic = M - N;
+    String temp;
+    while ( reader.hasNextLine() ) {
+      wordCount++;
+      temp = reader.nextLine();
+      int idx = getidx( temp, NUMER_OF_CHARS );
+
+      if ( myHash[ idx ] == null ) {
+        myHash[ idx ] = temp;
+      } else {
+
+        while ( myHash[ idx ] != null ) {
+          //place collision resolve here
+          collisions++;
+          idx = getResolvedIdx( idx );
+        }
+        myHash[ idx ] = temp;
+      }
+    }
+    reader.close();
+  }
+
+  /*
+  * this function will resolve collisions and assign a new index
+  * @param idx, current invalid index
+  * @return new index to be used
+  */
+  public static int getResolvedIdx( int idx ) {
+
+    return idx = ( idx + N ) % M;
+  }
+
+  /*
+  * this is the hash function that assigns an integer to a string
+  * which will represent its index into the array of strings
+  * a polynomial hashing function that takes order into account
+  * @param temp, the string used to create the index
+  * @return idx, index of the string we are looking for
+  */
+  public static int getidx( String temp, int myCount ) {
+    // i can write this loop better
+    int idx = 0;
+    int minCount = Math.min( myCount, temp.length() );
+
+    for ( int i = 0; i < minCount; i++ ) {
+      idx += ( ( temp.charAt( i )^( myCount - i ) ) );
+    }
+
+
+    // for testing
+    if ( idx >= M ) {
+      System.out.println( " super high: " + temp );
+      System.exit(0);
+    }
+    return idx;
+  }
+
+  /*
+  * prints the hash table for testing
+  */
+  public static void printHash() {
+    int count = 0;
+    while ( count < M ) {
+      System.out.println( myHash[ count ] );
+      count++;
+    }
+  }
+
+  public static void report() {
+    System.out.println( "Constructing dictionary had this many collisions: " + collisions );
+    System.out.println( "Amount of words in the dictionary: " + wordCount );
+    System.out.println( "Amount of words to check: " +  spellWordCount );
+    System.out.println( "checking spell file had this many probes: " + spellCollisions );
+    System.out.println( "average probes per word: " + ( spellCollisions / spellWordCount) );
+
+    System.out.println( "-----------------------------------" );
+    System.out.println();
+  }
+}

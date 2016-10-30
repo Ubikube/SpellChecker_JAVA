@@ -1,0 +1,10 @@
+if ( k >= MAX_KIDS ) {
+          System.out.println( " too many collisions here : " + temp );
+          System.out.println( idx );
+          System.out.println( " [ " );
+          for ( int i = 0; i < MAX_KIDS; i++ ) {
+            System.out.println( myHash[ idx ][ i ] + ", " );
+          }
+          System.out.println( "was too many collisions here line 121 " );
+          System.exit(0);
+        }
